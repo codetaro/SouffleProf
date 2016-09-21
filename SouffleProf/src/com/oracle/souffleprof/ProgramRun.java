@@ -26,9 +26,8 @@ public class ProgramRun implements Serializable{
      * 
      */
     private static final long serialVersionUID = -4236231035756069616L;
-    private Map<String, Relation> relation_map;
-    private int rel_id = 0;
     private Double runtime;
+    private Map<String, Relation> relation_map;
     private Double tot_rec_tup = 0.0;
     private Double tot_copy_time = 0.0;
 
@@ -41,55 +40,6 @@ public class ProgramRun implements Serializable{
     public void update() {
         tot_rec_tup = getTotNumRecTuples().doubleValue();
         tot_copy_time = getTotCopyTime();
-    }
-
-    /**
-     * Inserts profile data from part into data model.
-     * 
-     * @param data
-     */
-    public void process(String[] data) {
-
-        if (data[0].equals("runtime")) {
-            this.runtime = Double.parseDouble(data[1]);
-
-        } else {
-
-            Relation rel;
-            if (!relation_map.containsKey(data[1])) {
-                rel = new Relation(data[1], createId());
-                relation_map.put(data[1], rel);
-            } else {
-                rel = relation_map.get(data[1]);
-            }
-
-            if (data[0].contains("nonrecursive")) {
-
-                if (data[0].charAt(0) == 't' && data[0].contains("relation")) {
-                    rel.setRuntime(Double.parseDouble(data[3]));
-                    rel.setLocator(data[2]);
-
-                } else if (data[0].charAt(0) == 'n'
-                        && data[0].contains("relation")) {
-                    rel.setNum_tuples(Long.parseLong(data[3]));
-
-                } else if (data[0].contains("rule")) {
-                    rel.addRule(data);
-                }
-
-            } else if (data[0].contains("recursive")) {
-                rel.addIteration(data);
-            }
-        }
-
-    }
-
-    /**
-     * @return
-     */
-    private String createId() {
-        this.rel_id++;
-        return "R" + this.rel_id;
     }
 
     @Override
@@ -105,12 +55,20 @@ public class ProgramRun implements Serializable{
     public Map<String, Relation> getRelation_map() {
         return relation_map;
     }
+    
+    public void setRelation_map(Map<String, Relation> relation_map) {
+    	this.relation_map = relation_map;
+    }
 
     public String getRuntime() {
         if (runtime == -1.0) {
             return "--";
         }
         return formatTime(runtime)+"";
+    }
+    
+    public void setRuntime(Double runtime) {
+    	this.runtime = runtime;
     }
 
     public Long getTotNumTuples() {

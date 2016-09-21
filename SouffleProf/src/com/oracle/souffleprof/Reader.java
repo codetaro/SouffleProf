@@ -20,6 +20,8 @@ import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Reads the profile information from a file 
@@ -39,6 +41,8 @@ public class Reader {
         this.file = new File(arg);
         this.run = run;
         this.online = online;
+        relation_map = new HashMap<String, Relation>();
+        runtime = -1.0;
     }
 
     public void readFile() {
@@ -62,7 +66,7 @@ public class Reader {
                             part = str.substring(1).split("\\s*;\\s*");
                         }
                         mes = str;
-                        run.process(part);
+                        process(part);
                     }
                 }
                 r.seek(r.getFilePointer());
@@ -87,7 +91,7 @@ public class Reader {
                             part = str.substring(1).split("\\s*;\\s*");
                         }
                         mes = str;
-                        run.process(part);
+                        process(part);
                     }
                 }
                 br.close();
@@ -224,6 +228,63 @@ public class Reader {
 
     }
 
+    /* refactor Raihaan's SouffleProf v2.1.8 */
+    private Double runtime;
+    private Map<String, Relation> relation_map;
+    private int rel_id = 0;
+    
+    
+	/**
+	 * Inserts profile data from part into data model.
+	 * 
+	 * @param data
+	 */
+	public void process(String[] data) {
+
+		if (data[0].equals("runtime")) {
+			this.runtime = Double.parseDouble(data[1]);
+
+		} else {
+
+			Relation rel;
+			if (!relation_map.containsKey(data[1])) {
+				rel = new Relation(data[1], createId());
+				relation_map.put(data[1], rel);
+			} else {
+				rel = relation_map.get(data[1]);
+			}
+			
+
+			if (data[0].contains("nonrecursive")) {
+
+				if (data[0].charAt(0) == 't' && data[0].contains("relation")) {
+					rel.setRuntime(Double.parseDouble(data[3]));
+					rel.setLocator(data[2]);
+
+				} else if (data[0].charAt(0) == 'n' && data[0].contains("relation")) {
+					rel.setNum_tuples(Long.parseLong(data[3]));
+
+				} else if (data[0].contains("rule")) {
+					rel.addRule(data);
+				}
+
+			} else if (data[0].contains("recursive")) {
+				rel.addIteration(data);
+			}
+		}
+		
+		run.setRuntime(this.runtime);
+		run.setRelation_map(this.relation_map);
+	}
+	
+	/**
+	 * @return
+	 */
+	private String createId() {
+		this.rel_id++;
+		return "R" + this.rel_id;
+	}
+
 }
 
 class RunnableThread implements Runnable {
@@ -238,6 +299,7 @@ class RunnableThread implements Runnable {
     private volatile boolean updated = false; // if display reflects updated
     // data model
     private ProgramRun run;
+    private Reader reader;
     private String[] test;
 
     RunnableThread(File file, long fp, ProgramRun run) {
@@ -248,6 +310,14 @@ class RunnableThread implements Runnable {
         this.run = run;
     }
 
+    RunnableThread(File file, long fp, Reader reader) {
+    	this.file = file;
+    	this.filepointer = fp;
+    	this.prev_filepointer = fp;
+    	running = true;
+    	this.reader = reader;
+    }
+    
     @Override
     public void run() {
         try {
@@ -311,7 +381,7 @@ class RunnableThread implements Runnable {
                                 part = line.substring(1).split("\\s*;\\s*");
                             }
                             test = part;
-                            run.process(part);
+                            reader.process(part);
                         }
 
                     }
