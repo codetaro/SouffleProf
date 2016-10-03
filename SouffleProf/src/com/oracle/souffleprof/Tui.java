@@ -14,8 +14,10 @@ import java.util.List;
  *
  */
 public class Tui {
+	
+	private OutputProcessor out;
 
-    private ProgramRun run;
+//    private ProgramRun run;
     private boolean loaded;
     private String f_name;
     private Reader live_reader;
@@ -27,8 +29,10 @@ public class Tui {
     private int sortDir = 1;
 
     public Tui(String f_name, boolean live) {
-        this.run = new ProgramRun();
-        Reader reader = new Reader(f_name, this.run, false, live);
+    	out = new OutputProcessor();
+//        this.run = new ProgramRun();
+        ProgramRun run = out.getProgramRun();
+        Reader reader = new Reader(f_name, run, false, live);
         reader.readFile();
         if (live) {
             this.live_reader = reader;
@@ -36,8 +40,8 @@ public class Tui {
         this.loaded = reader.isLoaded();
         this.f_name = f_name;
         this.alive = live;
-        rul_table_state = run.getRulTable();
-        rel_table_state = run.getRelTable();
+        rul_table_state = out.getRulTable();
+        rel_table_state = out.getRelTable();
     }
 
     public void runCommand(String[] c) {
@@ -181,7 +185,8 @@ public class Tui {
             runser = (ProgramRun) in.readObject();
             in.close();
             fileIn.close();
-            this.run = runser;
+            ProgramRun run = out.getProgramRun();
+            run = runser;
         } catch (IOException i) {
             i.printStackTrace();
             return;
@@ -196,7 +201,8 @@ public class Tui {
             FileOutputStream fileOut
             = new FileOutputStream("/tmp/employee.ser");
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
-            out.writeObject(run);
+            ProgramRun programRun = this.out.getProgramRun();
+            out.writeObject(programRun);
             out.close();
             fileOut.close();
             System.out.printf("Serialized data is saved in /tmp/employee.ser");
@@ -207,7 +213,8 @@ public class Tui {
 
     private void save(String save_name) {
         if (loaded) {
-            Reader saver = new Reader(this.f_name, this.run, false, false);
+        	ProgramRun run = out.getProgramRun();
+            Reader saver = new Reader(this.f_name, run, false, false);
             saver.save(save_name);
             System.out.println("Save success.");
         } else {
@@ -225,7 +232,8 @@ public class Tui {
         loader.readFile();
         if (loader.isLoaded()) {
             System.out.println("Load success");
-            this.run = new_run;
+            ProgramRun run = out.getProgramRun();
+            run = new_run;
             this.loaded = true;
             this.f_name = f_name;
             if (alive) {
@@ -283,6 +291,7 @@ public class Tui {
     }
 
     private void top() {
+    	ProgramRun run = out.getProgramRun();
         System.out.println("\n Total runtime: " + run.getRuntime());
         System.out.println("\n Total number of new tuples: " + run.formatNum(precision, run.getTotNumTuples()));
     }
@@ -327,7 +336,7 @@ public class Tui {
             break;
         }
 
-        Object[][] table = run.formatTable(rel_table_state, precision);
+        Object[][] table = out.formatTable(rel_table_state, precision);
         System.out.print(String.format(" ----- Relation Table -----\n"));
         System.out.print(String.format("%8s%8s%8s%8s%15s%6s%1s%-25s\n\n", 
                 "TOT_T", "NREC_T", "REC_T", "COPY_T", "TUPLES", "ID", "", "NAME"));
@@ -380,7 +389,7 @@ public class Tui {
                     DataComparator.getComparator(sortDir, DataComparator.TIME));
             break;
         }
-        Object[][] table = run.formatTable(rul_table_state, precision);
+        Object[][] table = out.formatTable(rul_table_state, precision);
         System.out.print("  ----- Rule Table -----\n");
         System.out.print(String.format("%8s%8s%8s%8s%15s    %-5s\n\n", "TOT_T",
                 "NREC_T", "REC_T", "COPY_T", "TUPLES", "ID RELATION"));
@@ -394,7 +403,7 @@ public class Tui {
     }
 
     private void id(String col) {
-        Object[][] table = run.formatTable(rul_table_state, precision);
+        Object[][] table = out.formatTable(rul_table_state, precision);
         if (col.equals("0")) {
             System.out.print(String.format("%7s%2s%-25s\n\n", "ID", "", "NAME"));
             Arrays.sort(table,
@@ -442,8 +451,8 @@ public class Tui {
                     DataComparator.getComparator(sortDir, DataComparator.TIME));
             break;
         }
-        Object[][] rul_table = run.formatTable(rul_table_state, precision);
-        Object[][] rel_table = run.formatTable(rel_table_state, precision);
+        Object[][] rul_table = out.formatTable(rul_table_state, precision);
+        Object[][] rel_table = out.formatTable(rel_table_state, precision);
         System.out.print("  ----- Rules of a Relation -----\n");
         System.out.print(String.format("%8s%8s%8s%8s%10s%8s %-25s\n\n", "TOT_T",
                 "NREC_T", "REC_T", "COPY_T", "TUPLES", "ID", "NAME"));
@@ -468,6 +477,7 @@ public class Tui {
             }
         }
         String src = "";
+        ProgramRun run = out.getProgramRun();
         if (run.getRelation(name) != null) {
             src = run.getRelation(name).getLocator();
         }
@@ -487,7 +497,7 @@ public class Tui {
         }
         String[] part = str.split("\\.", 2);
         String strRel = "R" + part[0].substring(1);
-        Object[][] ver_table = run.getVersions(strRel, str);
+        Object[][] ver_table = out.getVersions(strRel, str);
         switch (sort_col) {
         case 0:
             Arrays.sort(ver_table,
@@ -518,7 +528,7 @@ public class Tui {
                     DataComparator.getComparator(sortDir, DataComparator.TIME));
             break;
         }
-        Object[][] rul_table = run.formatTable(rul_table_state, precision);
+        Object[][] rul_table = out.formatTable(rul_table_state, precision);
         System.out.print("  ----- Rule Versions Table -----\n");
         System.out.print(String.format("%8s%8s%8s%8s%10s%6s   %-5s\n\n", "TOT_T",
                 "NREC_T", "REC_T", "COPY_T", "TUPLES", "VER", "ID RELATION"));
@@ -535,8 +545,8 @@ public class Tui {
         System.out.print(" ---------------------------------------------------------\n");
         for (final Object[] row : ver_table) {
             System.out.print(String.format("%8s%8s%8s%8s%10s%6s%7s %-25s\n",
-                    run.formatTime(row[0]), run.formatTime(row[1]), run.formatTime(row[2]),
-                    run.formatTime(row[3]), row[4], row[8], row[6],
+                    out.formatTime(row[0]), out.formatTime(row[1]), out.formatTime(row[2]),
+                    out.formatTime(row[3]), row[4], row[8], row[6],
                     row[7]));
 
         }
@@ -556,13 +566,13 @@ public class Tui {
     }
 
     private void iterRel(String c, String col) {
-        Object[][] table = run.formatTable(rel_table_state, -1);
+        Object[][] table = out.formatTable(rel_table_state, -1);
         List<Iteration> iter;
         for (final Object[] row : table) {
             if (((String) row[6]).equals(c) || ((String) row[5]).equals(c)) {
                 System.out.print(
                         (String.format("%4s%2s%-25s\n\n", row[6], "", row[5])));
-
+                ProgramRun run = out.getProgramRun();
                 iter = run.getRelation_map().get((String) row[5])
                         .getIterations();
                 List<Object> list = new ArrayList<Object>();
@@ -595,13 +605,13 @@ public class Tui {
     }
 
     private void iterRul(String c, String col) {
-        Object[][] table = run.formatTable(rul_table_state, precision);
+        Object[][] table = out.formatTable(rul_table_state, precision);
         List<Iteration> iter;
         for (Object[] row : table) {
             if (((String) row[6]).equals(c)) {
                 System.out.print(
                         (String.format("%6s%2s%-25s\n\n", row[6], "", row[5])));
-
+                ProgramRun run = out.getProgramRun();
                 iter = run.getRelation_map().get((String) row[7])
                         .getIterations();
                 List<Object> list = new ArrayList<Object>();
@@ -652,7 +662,7 @@ public class Tui {
         }
         String[] part = c.split("\\.", 2);
         String strRel = "R" + part[0].substring(1);
-        Object[][] ver_table = run.getVersions(strRel, c);
+        Object[][] ver_table = out.getVersions(strRel, c);
         System.out.print((String.format("%6s%2s%-25s\n\n", ver_table[0][6], "",
                 ver_table[0][5])));
         List<Object> list = new ArrayList<Object>();
@@ -718,7 +728,7 @@ public class Tui {
             Arrays.fill(chars, '*');
             String bar = new String(chars);
             System.out.print(
-                    (String.format("%4d %8s | %s\n", i++, run.formatNum(precision, num), bar)));
+                    (String.format("%4d %8s | %s\n", i++, out.formatNum(precision, num), bar)));
         }      
     }
 }
