@@ -21,6 +21,7 @@ import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -265,11 +266,13 @@ public class Reader {
 					rel.setNum_tuples(Long.parseLong(data[3]));
 
 				} else if (data[0].contains("rule")) {
-					rel.addRule(data);
+//					rel.addRule(data);
+					addRule(rel, data);
 				}
 
 			} else if (data[0].contains("recursive")) {
-				rel.addIteration(data);
+//				rel.addIteration(data);
+				addIteration(rel, data);
 			}
 		}
 		
@@ -285,6 +288,72 @@ public class Reader {
 		return "R" + this.rel_id;
 	}
 
+	/**
+	 * @param data = [x-rul; rel_name; version; loc; rul_name; val] 
+	 * 				 [x-rel; rel_name; loc; val]
+	 */
+	public void addIteration(Relation rel, String[] data) {
+
+		boolean ready = rel.isReady();
+		List<Iteration> iterations = rel.getIterations();
+		String locator = rel.getLocator();
+
+		Iteration iter;
+		if (ready || iterations.isEmpty()) {
+			iter = new Iteration();
+			iterations.add(iter);
+			// ready = false;
+			rel.setReady(false);
+		} else {
+			iter = iterations.get(iterations.size() - 1);
+		}
+
+		if (data[0].contains("rule")) {
+			String temp = rel.createRecID(data[4]);
+			iter.addRule(data, temp);
+
+		} else if (data[0].charAt(0) == 't' && data[0].contains("relation")) {
+			iter.setRuntime(Double.parseDouble(data[3]));
+			iter.setLocator(data[2]);
+			// locator = (String) data[2];
+			rel.setLocator((String) data[2]);
+		} else if (data[0].charAt(0) == 'n' && data[0].contains("relation")) {
+			iter.setNum_tuples(Long.parseLong(data[3]));
+		} else if (data[0].charAt(0) == 'c' && data[0].contains("relation")) {
+			iter.setCopy_time(Double.parseDouble(data[3]));
+			// ready = true;
+			rel.setReady(true);
+		}
+
+	}
+    
+	/*
+	 * Adds non-recursive rule to this relation.
+	 */
+	public void addRule(Relation rel, String[] data) {
+		Map<String, Rule> ruleMap = rel.getRuleMap();
+		long prev_num_tuples = rel.getPrev_num_tuples();
+
+		Rule rul;
+		if (!ruleMap.containsKey(data[3])) {
+			rul = new Rule(data[3], rel.createID());
+			ruleMap.put(data[3], rul);
+		} else {
+			rul = ruleMap.get(data[3]);
+		}
+
+		if (data[0].charAt(0) == 't') {
+			// int len = data.length;
+			rul.setRuntime(Double.parseDouble(data[4]));
+			rul.setLocator(data[2]);
+		} else if (data[0].charAt(0) == 'n') {
+			assert rul != null;
+			rul.setNum_tuples(Long.parseLong(data[4]) - prev_num_tuples);
+			// this.prev_num_tuples = Long.parseLong(data[4]);
+			rel.setPrev_num_tuples(Long.parseLong(data[4]));
+		}
+
+	}
 }
 
 class RunnableThread implements Runnable {
