@@ -50,7 +50,7 @@ public class Relation implements Serializable {
 
     public String createRecID(String name) {
         for (Iteration iter : iterations) {
-            for (RuleRecursive rul : iter.getRul_rec().values()) {
+            for (Rule rul : iter.getRul_rec().values()) {
                 if (rul.getName().equals(name)) {
                     return rul.getId();
                 }
@@ -94,7 +94,7 @@ public class Relation implements Serializable {
             result += rul.getNum_tuples();
         }
         for (Iteration iter : iterations) {
-            for (RuleRecursive rul : iter.getRul_rec().values()) {
+            for (Rule rul : iter.getRul_rec().values()) {
                 result += rul.getNum_tuples();
             }
         }
@@ -108,7 +108,7 @@ public class Relation implements Serializable {
     public Long getTotNumRec_tuples() {
         Long result = 0L;
         for (Iteration iter : iterations) {
-            for (RuleRecursive rul : iter.getRul_rec().values()) {
+            for (Rule rul : iter.getRul_rec().values()) {
                 result += rul.getNum_tuples();
             }
         }
@@ -148,10 +148,10 @@ public class Relation implements Serializable {
         return this.ruleMap;
     }
 
-    public List<RuleRecursive> getRuleRecList() {
-        List<RuleRecursive> temp = new ArrayList<RuleRecursive>();
+    public List<Rule> getRuleRecList() {
+        List<Rule> temp = new ArrayList<Rule>();
         for (Iteration iter : iterations) {
-            for (RuleRecursive rul : iter.getRul_rec().values()) {
+            for (Rule rul : iter.getRul_rec().values()) {
                 temp.add(rul);
             }
         }

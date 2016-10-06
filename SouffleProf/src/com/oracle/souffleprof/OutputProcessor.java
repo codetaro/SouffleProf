@@ -91,7 +91,7 @@ public class OutputProcessor {
 
 			for (Iteration iter : rel.getIterations()) {
 				Object[] temp;
-				for (RuleRecursive rul : iter.getRul_rec().values()) {
+				for (Rule rul : iter.getRul_rec().values()) {
 
 					if (rule_map.containsKey(rul.getName())) {
 						temp = rule_map.get(rul.getName());
@@ -175,7 +175,7 @@ public class OutputProcessor {
 
 			for (Iteration iter : rel.getIterations()) {
 				Object[] temp;
-				for (RuleRecursive rul : iter.getRul_rec().values()) {
+				for (Rule rul : iter.getRul_rec().values()) {
 
 					if (rule_map.containsKey(rul.getName())) {
 						temp = rule_map.get(rul.getName());
@@ -244,7 +244,7 @@ public class OutputProcessor {
 
 				for (Iteration iter : rel.getIterations()) {
 					Object[] temp;
-					for (RuleRecursive rul : iter.getRul_rec().values()) {
+					for (Rule rul : iter.getRul_rec().values()) {
 
 						if (rul.getId().equals(strRul)) {
 							String strTemp = rul.getName() + rul.getLocator() + rul.getVersion();
@@ -318,7 +318,7 @@ public class OutputProcessor {
 
 				for (Iteration iter : rel.getIterations()) {
 					Object[] temp;
-					for (RuleRecursive rul : iter.getRul_rec().values()) {
+					for (Rule rul : iter.getRul_rec().values()) {
 
 						if (rul.getId().equals(strRul)) {
 							String strTemp = rul.getName() + rul.getLocator() + rul.getVersion();

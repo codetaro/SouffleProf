@@ -619,7 +619,7 @@ public class Tui {
                     for (Iteration i : iter) {
                         Boolean add = false;
                         Double tot_time = 0.0;
-                        for (RuleRecursive rul : i.getRul_rec().values()) {
+                        for (Rule rul : i.getRul_rec().values()) {
                             if (rul.getId().equals(c)) {
                                 tot_time += rul.getRuntime();
                                 add = true;
@@ -636,7 +636,7 @@ public class Tui {
                     for (Iteration i : iter) {
                         Boolean add = false;
                         Long tot_num = 0L;
-                        for (RuleRecursive rul : i.getRul_rec().values()) {
+                        for (Rule rul : i.getRul_rec().values()) {
                             if (rul.getId().equals(c)) {
                                 tot_num += rul.getNum_tuples();
                                 add = true;
