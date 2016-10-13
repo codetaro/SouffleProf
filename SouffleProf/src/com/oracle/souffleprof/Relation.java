@@ -14,11 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 
- * data class for Relations
- *
- */
 public class Relation implements Serializable {
 
     private static final long serialVersionUID = 2674759421227104137L;

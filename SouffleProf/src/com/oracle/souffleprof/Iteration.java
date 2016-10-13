@@ -27,11 +27,9 @@ public class Iteration implements Serializable {
 	private String locator = "";
 	private long prev_num_tuples = 0;
 
-//	private Map<String, RuleRecursive> rul_rec_map;
 	private Map<String, Rule> rul_rec_map;
 
 	public Iteration() {
-//		this.rul_rec_map = new HashMap<String, RuleRecursive>();
 		this.rul_rec_map = new HashMap<String, Rule>();
 	}
 
@@ -43,7 +41,6 @@ public class Iteration implements Serializable {
 
 			for (String name : rul_rec_map.keySet()) {
 				if (name.equals(strTemp)) {
-//					RuleRecursive rul_rec = rul_rec_map.get(strTemp);
 					Rule rul_rec = rul_rec_map.get(strTemp);
 					rul_rec.setRuntime(Double.parseDouble(data[5])
 							+ rul_rec.getRuntime());
@@ -51,14 +48,14 @@ public class Iteration implements Serializable {
 				}
 			}
 			if (!exists) {
-				Rule rul_rec = new Rule(data[4], Integer.parseInt(data[2]), rec_id);
+				Rule rul_rec = new Rule(data[4], 
+						Integer.parseInt(data[2]), rec_id);
 				rul_rec.setRuntime(Double.parseDouble(data[5]));
 				rul_rec.setLocator(data[3]);
 				rul_rec_map.put(strTemp, rul_rec);
 			}
 
 		} else if (data[0].charAt(0) == 'n') {
-//			RuleRecursive rul_rec = rul_rec_map.get(strTemp);
 			Rule rul_rec = rul_rec_map.get(strTemp);
 			assert rul_rec != null : "missing t tag";
 			rul_rec.setNum_tuples(Long.parseLong(data[5]) - prev_num_tuples);

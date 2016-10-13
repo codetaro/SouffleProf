@@ -26,8 +26,9 @@ public class ProgramRun implements Serializable{
      * 
      */
     private static final long serialVersionUID = -4236231035756069616L;
-    private Double runtime;
     private Map<String, Relation> relation_map;
+    private int rel_id = 0;
+    private Double runtime;
     private Double tot_rec_tup = 0.0;
     private Double tot_copy_time = 0.0;
 
@@ -111,62 +112,96 @@ public class ProgramRun implements Serializable{
         }
         return null;
     }
-    
-	public String formatNum(int precision, Object number) {
 
-		if (precision == -1) {
-			return "" + number;
-		}
-		long amount = (Long) number;
-		String result;
-		DecimalFormat formatter;
-		if (amount >= 1000000000) {
-			amount = (amount + 5000000) / 10000000;
-			result = amount + "B";
-			result = result.substring(0, 1) + "." + result.substring(1);
-		} else if (amount >= 100000000) {
-			amount = (amount + 500000) / 1000000;
-			result = amount + "M";
-			formatter = new DecimalFormat("###,###");
-		} else if (amount >= 1000000) {
-			amount = (amount + 5000) / 10000;
+    public String[][] formatTable(Object[][] table, int precision) {
+        String[][] new_table = new String[table.length][table[0].length];
+        for (int i = 0; i < table.length; i++) {
+            for (int j = 0; j < table[0].length; j++) {
+                if (table[i][j] instanceof Double) {
+                    new_table[i][j] = formatTime((Double)table[i][j]);
+                } else if (table[i][j] instanceof Long) {
+                    new_table[i][j] = formatNum(precision, (Long)table[i][j]);
+                } else if (table[i][j] != null) {
+                    new_table[i][j] = table[i][j].toString();
+                } else {
+                    new_table[i][j] = "-";
+                }
+            }
+        }
+        return new_table;
+    }
 
-			result = amount + "M";
-			result = result.substring(0, result.length() - 3) + "."
-					+ result.substring(result.length() - 3, result.length());
-		} else {
-			formatter = new DecimalFormat("###,###");
-			result = formatter.format(amount);
-		}
+    public String formatNum(int precision, Object number) {
+        Long amount;
+        if (number != null && number instanceof Long) {
+            amount = (Long) number;
+        } else {
+            return "0";
+        }
+        if (precision == -1) {
+            return Long.toString(amount);
+        }
 
-		return result;
-	}
-    
-	public String formatTime(Object number) {
-		long val;
-		long sec = Math.round((Double) number);
-		if (sec >= 100) {
-			val = TimeUnit.SECONDS.toMinutes(sec);
-			if (val < 100) {
-				if (val < 10) {
-					String temp = (double) ((double) (sec - (TimeUnit.MINUTES.toSeconds(val))) / 60) * 100 + "";
-					return val + "." + temp.substring(0, 1) + "m";
-				}
-				return val + "m";
-			}
-			val = TimeUnit.MINUTES.toHours(val);
-			if (val < 100) {
-				return val + "h";
-			}
-			val = TimeUnit.HOURS.toDays(val);
-			return val + "D";
-		} else if (sec >= 10) {
-			return sec + "";
-		} else if (Double.compare((Double) number, 1.0) >= 0) {
-			DecimalFormat formatter = new DecimalFormat("0.0");
-			return formatter.format(number);
-		}
-		DecimalFormat formatter = new DecimalFormat(".000");
-		return formatter.format(number);
-	}
+        String result;
+        DecimalFormat formatter;
+        if (amount >= 1000000000) {
+            amount = (amount + 5000000) / 10000000;
+            result = amount + "B";
+            result = result.substring(0, 1) + "." + result.substring(1);
+        } else if (amount >= 100000000) {
+            amount = (amount + 500000) / 1000000;
+            result = amount + "M";
+            formatter = new DecimalFormat("###,###");
+        } else if (amount >= 1000000) {
+            amount = (amount + 5000) / 10000;
+
+            result = amount + "M";
+            result = result.substring(0, result.length() - 3) + "."
+                    + result.substring(result.length() - 3, result.length());
+        } else {
+            formatter = new DecimalFormat("###,###");
+            result = formatter.format(amount);
+        }
+
+        return result;
+    }
+
+    public String formatTime(Object number) {
+        Double time = null;
+        if (number instanceof Double) {
+            time = (Double) number;
+        }
+        if (time == null || time.isNaN()) {
+            return "-";
+        }
+
+        long val;
+        long sec = Math.round(time);
+        if (sec >= 100) {
+            val = TimeUnit.SECONDS.toMinutes(sec);
+            if (val < 100) {
+                if (val < 10) {
+                    String temp = (double) ((double) (sec - (TimeUnit.MINUTES
+                            .toSeconds(val))) / 60) * 100 + "";
+                    return val + "." + temp.substring(0, 1) + "m";
+                }
+                return val + "m";
+            }
+            val = TimeUnit.MINUTES.toHours(val);
+            if (val < 100) {
+                return val + "h";
+            }
+            val = TimeUnit.HOURS.toDays(val);
+            return val + "D";
+        } else if (sec >= 10) {
+            return sec + "";
+        } else if (Double.compare(time, 1.0) >= 0) {
+            DecimalFormat formatter = new DecimalFormat("0.00");
+            return formatter.format(number);
+        } else if (Double.compare(time, 0.001) >= 0) {
+            DecimalFormat formatter = new DecimalFormat(".000");
+            return formatter.format(number);
+        }
+        return ".000";
+    }
 }

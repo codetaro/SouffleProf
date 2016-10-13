@@ -10,7 +10,7 @@ package com.oracle.souffleprof;
 
 /**
  * Command Line Interface 
- * controls the launching of SouffleProf
+ * 
  * Provides an interface to parse the execution arguments of the souffle profiler 
  */
 

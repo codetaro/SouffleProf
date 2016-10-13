@@ -10,11 +10,6 @@ package com.oracle.souffleprof;
 
 import java.io.Serializable;
 
-/**
- * 
- * data class for Rules
- *
- */
 public class Rule implements Serializable {
 
     private static final long serialVersionUID = -2518455587078964434L;
