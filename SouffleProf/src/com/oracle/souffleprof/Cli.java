@@ -36,7 +36,7 @@ public class Cli {
      * Prints usage of souffle profiler
      */
     public void error() {
-        System.out.println("java -jar souffleprof.jar [-f <file> [-c <command>] [-l]] [-h]"); 
+        System.out.println("java -jar souffleprof.jar [-f|-j <file> [-c <command>] [-l]] [-h]"); 
         System.exit(1); 
     }
 
@@ -83,6 +83,13 @@ public class Cli {
                     filename = args[i++]; 
                 } else { 
                     System.out.println("Parameter for option -f missing!"); 
+                    error(); 
+                }
+            } else if (arg.equals("-j")) { 
+                if (i  <= args.length) { 
+                    filename = args[i++]; 
+                } else { 
+                    System.out.println("Parameter for option -j missing!"); 
                     error(); 
                 }
             } else if (arg.equals("-l")) {

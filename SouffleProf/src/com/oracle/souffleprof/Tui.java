@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.gson.Gson;
+
 /**
  * @author ramod
  *
@@ -341,6 +343,20 @@ public class Tui {
         }
 
         String[][] table = out.formatTable(rel_table_state, precision);
+		
+        // TODO prevent generating output on command line
+		Gson gson = new Gson();
+		String json = gson.toJson(table);
+		File file = new File("/home/dennis/WebstormProjects/SouffleProfGui/json/rel.json");
+		try {
+			FileWriter fw = new FileWriter(file);
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(json);
+			bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        
         System.out.print(String.format(" ----- Relation Table -----\n"));
         System.out.print(String.format("%8s%8s%8s%8s%15s%6s%1s%-25s\n\n", 
                 "TOT_T", "NREC_T", "REC_T", "COPY_T", "TUPLES", "ID", "", "NAME"));
@@ -396,6 +412,20 @@ public class Tui {
             break;
         }
         String[][] table = out.formatTable(rul_table_state, precision);
+        
+		// TODO prevent generating output on command line
+		Gson gson = new Gson();
+		String json = gson.toJson(table);
+		File file = new File("/home/dennis/WebstormProjects/SouffleProfGui/json/rul.json");
+		try {
+			FileWriter fw = new FileWriter(file);
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(json);
+			bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+     		
         System.out.print("  ----- Rule Table -----\n");
         System.out.print(String.format("%8s%8s%8s%8s%15s    %-5s\n\n", "TOT_T",
                 "NREC_T", "REC_T", "COPY_T", "TUPLES", "ID RELATION"));
