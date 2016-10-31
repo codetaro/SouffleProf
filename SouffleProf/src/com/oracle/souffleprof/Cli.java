@@ -106,7 +106,12 @@ public class Cli {
         if (commands.length > 0) { 
             new Tui(filename, alive).runCommand(commands); 
         } else {
-            new Tui(filename, alive).runProf(); 
+        	if (args[0].equals("-j")) {
+        		// Output data models to SouffleProfGui in JSON format
+        		new Tui(filename, alive).runGui();
+        	} else {
+        		new Tui(filename, alive).runProf();	
+        	}
         }
     }
 }

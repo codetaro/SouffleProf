@@ -6,6 +6,7 @@ package com.oracle.souffleprof;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import com.google.gson.Gson;
@@ -94,6 +95,76 @@ public class Tui {
         }
     }
 
+    public void runGui() {
+    	
+    	Gson gson = new Gson();
+    	
+    	// Output overview
+    	ProgramRun run = out.getProgramRun();
+    	HashMap<String, String> overview = new HashMap<>();
+    	overview.put("Runtime", run.getRuntime());
+    	overview.put("TotTime", run.formatTime(run.getTotTime()));
+    	overview.put("TotCopyTime", run.formatTime(run.getTotCopyTime()));
+    	overview.put("TotNumTuples", run.formatNum(precision, run.getTotNumTuples()));
+    	overview.put("TotNumRecTuples", run.formatNum(precision, run.getTotNumRecTuples()));
+    	
+    	String overviewJson = gson.toJson(overview);
+    	File file = new File("/home/dennis/WebstormProjects/SouffleProfGui/json/overview.json");
+    	try {
+    		FileWriter fw = new FileWriter(file);
+    		BufferedWriter bw = new BufferedWriter(fw);
+    		bw.write(overviewJson);
+    		bw.close();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    	}
+    	
+    	// Output properties
+    	HashMap<String, String> properties = new HashMap<>();
+    	properties.put("LogFileName", f_name);
+    	
+    	String propertiesJson = gson.toJson(properties);
+    	file = new File("/home/dennis/WebstormProjects/SouffleProfGui/json/properties.json");
+    	try {
+    		FileWriter fw = new FileWriter(file);
+    		BufferedWriter bw = new BufferedWriter(fw);
+    		bw.write(propertiesJson);
+    		bw.close();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    	}
+    	
+    	// Output rel_table_state
+    	Arrays.sort(rel_table_state, DataComparator.getComparator(sortDir, DataComparator.TIME));
+    	String[][] rel = out.formatTable(rel_table_state, precision);
+    	String relJson = gson.toJson(rel);
+    	file = new File("/home/dennis/WebstormProjects/SouffleProfGui/json/rel.json");
+    	try {
+    		FileWriter fw = new FileWriter(file);
+    		BufferedWriter bw = new BufferedWriter(fw);
+    		bw.write(relJson);
+    		bw.close();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    	}
+    	
+    	// Output rul_table_state
+    	Arrays.sort(rul_table_state, DataComparator.getComparator(sortDir, DataComparator.TIME));
+    	String[][] rul = out.formatTable(rul_table_state, precision);
+    	String rulJson = gson.toJson(rul);
+    	file = new File("/home/dennis/WebstormProjects/SouffleProfGui/json/rul.json");
+    	try {
+    		FileWriter fw = new FileWriter(file);
+    		BufferedWriter bw = new BufferedWriter(fw);
+    		bw.write(rulJson);
+    		bw.close();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    	}
+    	
+    	quit();
+    }
+    
     public void runProf() {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
@@ -343,20 +414,6 @@ public class Tui {
         }
 
         String[][] table = out.formatTable(rel_table_state, precision);
-		
-        // TODO prevent generating output on command line
-		Gson gson = new Gson();
-		String json = gson.toJson(table);
-		File file = new File("/home/dennis/WebstormProjects/SouffleProfGui/json/rel.json");
-		try {
-			FileWriter fw = new FileWriter(file);
-			BufferedWriter bw = new BufferedWriter(fw);
-			bw.write(json);
-			bw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-        
         System.out.print(String.format(" ----- Relation Table -----\n"));
         System.out.print(String.format("%8s%8s%8s%8s%15s%6s%1s%-25s\n\n", 
                 "TOT_T", "NREC_T", "REC_T", "COPY_T", "TUPLES", "ID", "", "NAME"));
@@ -411,21 +468,8 @@ public class Tui {
                     DataComparator.getComparator(sortDir, DataComparator.TIME));
             break;
         }
-        String[][] table = out.formatTable(rul_table_state, precision);
         
-		// TODO prevent generating output on command line
-		Gson gson = new Gson();
-		String json = gson.toJson(table);
-		File file = new File("/home/dennis/WebstormProjects/SouffleProfGui/json/rul.json");
-		try {
-			FileWriter fw = new FileWriter(file);
-			BufferedWriter bw = new BufferedWriter(fw);
-			bw.write(json);
-			bw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-     		
+        String[][] table = out.formatTable(rul_table_state, precision);
         System.out.print("  ----- Rule Table -----\n");
         System.out.print(String.format("%8s%8s%8s%8s%15s    %-5s\n\n", "TOT_T",
                 "NREC_T", "REC_T", "COPY_T", "TUPLES", "ID RELATION"));
